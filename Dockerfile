@@ -1,7 +1,7 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl ca-certificates git ffmpeg && \
+    apt-get install -y --no-install-recommends curl ca-certificates git ffmpeg inotify-tools && \
     rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
@@ -29,7 +29,8 @@ RUN mkdir -p /data/.hermes
 COPY server.py /app/server.py
 COPY templates/ /app/templates/
 COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+COPY sync-state.sh /app/sync-state.sh
+RUN chmod +x /app/start.sh /app/sync-state.sh
 
 ENV HOME=/data
 ENV HERMES_HOME=/data/.hermes
