@@ -1,11 +1,9 @@
 #!/bin/bash
-# Watches critical hermes state files and syncs to greg-teh-robot/hermes-state on change.
-# Runs as a background process alongside the gateway. Zero LLM tokens.
+# Syncs critical hermes state files to greg-teh-robot/hermes-state.
+# Polls every 2 hours, commits only if files changed. Zero LLM tokens.
 
 REPO_DIR="/data/hermes-state"
 HERMES_DIR="/data/.hermes"
-WATCH_PATHS="$HERMES_DIR/SOUL.md $HERMES_DIR/config.yaml $HERMES_DIR/auth.json"
-WATCH_DIRS="$HERMES_DIR/skills $HERMES_DIR/memories $HERMES_DIR/cron"
 
 clone_if_needed() {
     if [ ! -d "$REPO_DIR/.git" ]; then
@@ -46,15 +44,9 @@ fi
 
 clone_if_needed || exit 0
 
-# Initial sync on startup
 sync_files
 
-# Watch for changes, debounce 30s
 while true; do
-    inotifywait -r -q -e modify,create,delete,move \
-        $WATCH_PATHS $WATCH_DIRS \
-        --timeout 3600 2>/dev/null
-
-    sleep 30
+    sleep 7200
     sync_files
 done
